@@ -1,0 +1,77 @@
+name: CI/CD — Build and Deploy to AKS
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  ACR_NAME: myacrdemorepo
+  RESOURCE_GROUP: rg-aks-demo
+  CLUSTER_NAME: aks-demo-cluster
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Récupérer le code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Login Azure avec Service Principal
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # 3. Login ACR
+    - name: Login to ACR
+      run: |
+        az acr login --name ${{ env.ACR_NAME }}
+
+    # 4. Build et Push Backend
+    - name: Build and Push Backend
+      run: |
+        az acr build \
+          --registry ${{ env.ACR_NAME }} \
+          --image backend:${{ github.sha }} \
+          --file app/backend/Dockerfile \
+          ./app/backend
+
+    # 5. Build et Push Frontend
+    - name: Build and Push Frontend
+      run: |
+        az acr build \
+          --registry ${{ env.ACR_NAME }} \
+          --image frontend:${{ github.sha }} \
+          --file app/frontend/Dockerfile \
+          --build-arg REACT_APP_API_URL=https://acity.work \
+          ./app/frontend
+
+    # 6. Récupérer kubeconfig AKS
+    - name: Get AKS credentials
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.RESOURCE_GROUP }}
+        cluster-name: ${{ env.CLUSTER_NAME }}
+
+    # 7. Déployer sur AKS
+    - name: Deploy to AKS
+      run: |
+        kubectl set image deployment/backend \
+          backend=${{ env.ACR_NAME }}.azurecr.io/backend:${{ github.sha }}
+
+        kubectl set image deployment/frontend \
+          frontend=${{ env.ACR_NAME }}.azurecr.io/frontend:${{ github.sha }}
+
+        kubectl rollout status deployment/backend
+        kubectl rollout status deployment/frontend
+
+    # 8. Vérifier le déploiement
+    - name: Verify deployment
+      run: |
+        kubectl get pods
+        kubectl get ingress
