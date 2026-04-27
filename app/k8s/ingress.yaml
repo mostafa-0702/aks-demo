@@ -5,6 +5,8 @@ metadata:
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"      # ← AJOUTÉ
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false" # ← AJOUTÉ
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
@@ -22,7 +24,7 @@ spec:
               service:
                 name: backend-svc
                 port:
-                  number: 3000
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
