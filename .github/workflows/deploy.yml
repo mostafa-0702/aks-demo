@@ -14,25 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Récupérer le code
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # 2. Login Azure avec Service Principal
+    # Login Azure avec client-secret (méthode classique SP)
     - name: Login to Azure
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}"}'
 
-    # 3. Login ACR
     - name: Login to ACR
       run: |
         az acr login --name ${{ env.ACR_NAME }}
 
-    # 4. Build et Push Backend
     - name: Build and Push Backend
       run: |
         az acr build \
@@ -41,7 +35,6 @@ jobs:
           --file app/backend/Dockerfile \
           ./app/backend
 
-    # 5. Build et Push Frontend
     - name: Build and Push Frontend
       run: |
         az acr build \
@@ -51,14 +44,12 @@ jobs:
           --build-arg REACT_APP_API_URL=https://acity.work \
           ./app/frontend
 
-    # 6. Récupérer kubeconfig AKS
     - name: Get AKS credentials
       uses: azure/aks-set-context@v3
       with:
         resource-group: ${{ env.RESOURCE_GROUP }}
         cluster-name: ${{ env.CLUSTER_NAME }}
 
-    # 7. Déployer sur AKS
     - name: Deploy to AKS
       run: |
         kubectl set image deployment/backend \
@@ -70,7 +61,6 @@ jobs:
         kubectl rollout status deployment/backend
         kubectl rollout status deployment/frontend
 
-    # 8. Vérifier le déploiement
     - name: Verify deployment
       run: |
         kubectl get pods
