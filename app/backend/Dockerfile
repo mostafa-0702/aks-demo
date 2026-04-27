@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM mcr.microsoft.com/mirror/docker/library/node:18-alpine
 
 WORKDIR /app
 

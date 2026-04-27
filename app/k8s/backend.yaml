@@ -17,6 +17,13 @@ spec:
         image: myacrdemorepo.azurecr.io/backend:v1
         ports:
         - containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
         env:
         - name: SQL_CONNECTION_STRING
           valueFrom:
@@ -32,6 +39,7 @@ spec:
   selector:
     app: backend
   ports:
-  - port: 3000
+  - name: http
+    port: 80
     targetPort: 3000
   type: ClusterIP
