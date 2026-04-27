@@ -13,7 +13,7 @@ ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
 # Stage 2 — Serve
-FROM mcr.microsoft.com/mirror/docker/library/nginx:alpine
+FROM mcr.microsoft.com/mirror/docker/library/nginx:1.25-alpine
 
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
