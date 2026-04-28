@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/mirror/docker/library/node:18-alpine
+FROM myacrdemorepo.azurecr.io/node:18-alpine
 
 WORKDIR /app
 
