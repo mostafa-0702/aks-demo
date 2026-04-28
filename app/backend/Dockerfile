@@ -1,12 +1,8 @@
-FROM myacrdemorepo.azurecr.io/node:18-alpine
+FROM myacrdemorepo.azurecr.io/cached/node:18-alpine
 
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install --only=production
-
 COPY src/ ./src/
-
 EXPOSE 3000
-
 CMD ["node", "src/server-fixed.js"]
