@@ -204,9 +204,9 @@ export default function App() {
       <div style={styles.container}>
         <div style={styles.header}>
           <span style={{ fontSize: '28px' }}>👥</span>
-          <h1 style={styles.title}>Gestion users lgnmm2 </h1>
+          <h1 style={styles.title}>Gestion users lgnmm3 </h1>
         </div>
-        <p style={styles.subtitle}>React + Node.js + Azure SQL - Deploye sur AKS2</p>
+        <p style={styles.subtitle}>React + Node.js + Azure SQL - Deploye sur AKS3</p>
 
         <div style={styles.cards}>
           <div style={styles.card}>
